@@ -1,9 +1,7 @@
 package codesquad.web;
 
-import codesquad.UnAuthenticationException;
 import codesquad.domain.User;
 import codesquad.domain.UserRepository;
-import codesquad.dto.UserDto;
 import codesquad.utils.HtmlFormDataBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -97,28 +95,4 @@ public class UserAcceptanceTest extends AcceptanceTest {
         assertTrue(response.getHeaders().getLocation().getPath().startsWith("/users"));
     }
 
-    @Test
-    public void 로그인_성공() throws Exception {
-        create();
-        User user = userRepository.findByUserId("testuser").orElseThrow(() -> new UnAuthenticationException());
-        assertEquals("testuser", user.getUserId());
-    }
-
-    @Test(expected = UnAuthenticationException.class)
-    public void 로그인_실패시_에러를_발생시키는가() throws Exception {
-        create();
-        userRepository.findByUserId("notuser").orElseThrow(() -> new UnAuthenticationException());
-    }
-
-    @Test
-    public void login() throws Exception {
-        HtmlFormDataBuilder htmlFormDataBuilder = HtmlFormDataBuilder.urlEncodedForm();
-        htmlFormDataBuilder.addParameter("userId", "test");
-        htmlFormDataBuilder.addParameter("password", "password2");
-        ResponseEntity<String> response = template().postForEntity("/users", htmlFormDataBuilder.build(), String.class);
-
-        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
-        log.debug("body : {}", response.getBody());
-        assertThat(response.getBody().contains("아이디 또는 비밀번호가 틀립니다. 다시 로그인 해주세요."), is(true));
-    }
 }
