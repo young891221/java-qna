@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.validation.constraints.Size;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Where;
 
 import codesquad.dto.QuestionDto;
@@ -90,5 +91,17 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @Override
     public String toString() {
         return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
+    }
+
+    public Question updateTitle(String title) {
+        if(StringUtils.isEmpty(title)) { throw new IllegalArgumentException(); }
+        this.title = title;
+        return this;
+    }
+
+    public Question updateContents(String contents) {
+        if(StringUtils.isEmpty(contents)) { throw new IllegalArgumentException(); }
+        this.contents = contents;
+        return this;
     }
 }
