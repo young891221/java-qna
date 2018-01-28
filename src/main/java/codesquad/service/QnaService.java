@@ -14,6 +14,7 @@ import java.util.List;
 import static java.util.Optional.ofNullable;
 
 @Service("qnaService")
+@Transactional
 public class QnaService {
     private static final Logger log = LoggerFactory.getLogger(QnaService.class);
 
@@ -39,7 +40,7 @@ public class QnaService {
     public Question update(User loginUser, long id, Question updatedQuestion) throws CannotManageException {
         Question question = ofNullable(questionRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 글이 없습니다."));
         checkIsOwner(loginUser, question);
-        return questionRepository.save(question.update(loginUser, updatedQuestion));
+        return question.update(loginUser, updatedQuestion);
     }
 
     @Transactional
