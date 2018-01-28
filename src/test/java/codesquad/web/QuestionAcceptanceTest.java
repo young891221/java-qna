@@ -45,6 +45,13 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
         return question;
     }
 
+    private HttpEntity<MultiValueMap<String, Object>> makQnaRequest(String ti, String contents) {
+        return urlEncodedForm()
+                .addParameter("title", ti)
+                .addParameter("contents", contents)
+                .build();
+    }
+
     @Test
     public void 질문_저장하기_테스트() {
         Question saveQuestion = questionRepository.save(question);
@@ -54,11 +61,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void 로그인한_사용자만_질문작성_가능한가() {
-        HttpEntity<MultiValueMap<String, Object>> request = urlEncodedForm()
-                .addParameter("title", "제목입니다.")
-                .addParameter("contents", "내용입니다.")
-                .build();
-        ResponseEntity<String> response = template().postForEntity("/questions", request, String.class);
+        ResponseEntity<String> response = template().postForEntity("/questions", makQnaRequest("제목입니다.", "내용입니다."), String.class);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
@@ -107,11 +110,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void 자신의_질문에_수정가능한가_통합_테스트() {
         Question saveQuestion = questionRepository.save(question);
-        HttpEntity<MultiValueMap<String, Object>> request = urlEncodedForm()
-                .addParameter("title", "수정 제목입니다.")
-                .addParameter("contents", "수정 내용입니다.")
-                .build();
-        ResponseEntity<String> response = template().exchange("/questions/"+saveQuestion.getId(), HttpMethod.PUT, request, String.class);
+        ResponseEntity<String> response = template().exchange("/questions/"+saveQuestion.getId(), HttpMethod.PUT, makQnaRequest("수정 제목입니다.", "수정 내용입니다."), String.class);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 

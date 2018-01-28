@@ -32,14 +32,8 @@ public class UserAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create() throws Exception {
-        HtmlFormDataBuilder htmlFormDataBuilder = HtmlFormDataBuilder.urlEncodedForm();
-
         String userId = "testuser";
-        htmlFormDataBuilder.addParameter("userId", userId);
-        htmlFormDataBuilder.addParameter("password", "password");
-        htmlFormDataBuilder.addParameter("name", "자바지기");
-        htmlFormDataBuilder.addParameter("email", "javajigi@slipp.net");
-        HttpEntity<MultiValueMap<String, Object>> request = htmlFormDataBuilder.build();
+        HttpEntity<MultiValueMap<String, Object>> request = makeUserRequest(null, userId, "password", "자바지기", "javajigi@slipp.net");
         ResponseEntity<String> response = template().postForEntity("/users", request, String.class);
 
         assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
@@ -77,22 +71,26 @@ public class UserAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
-    private ResponseEntity<String> update(TestRestTemplate template) throws Exception {
-        HtmlFormDataBuilder htmlFormDataBuilder = HtmlFormDataBuilder.urlEncodedForm();
-        htmlFormDataBuilder.addParameter("_method", "put");
-        htmlFormDataBuilder.addParameter("password", "password2");
-        htmlFormDataBuilder.addParameter("name", "자바지기2");
-        htmlFormDataBuilder.addParameter("email", "javajigi@slipp.net");
-        HttpEntity<MultiValueMap<String, Object>> request = htmlFormDataBuilder.build();
-
-        return template.postForEntity(String.format("/users/%d", defaultUser().getId()), request, String.class);
-    }
-
     @Test
     public void update() throws Exception {
         ResponseEntity<String> response = update(basicAuthTemplate());
         assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
         assertTrue(response.getHeaders().getLocation().getPath().startsWith("/users"));
+    }
+
+    private ResponseEntity<String> update(TestRestTemplate template) throws Exception {
+        HttpEntity<MultiValueMap<String, Object>> request = makeUserRequest("put", null, "password2", "자바지기2", "javajigi@slipp.net");
+        return template.postForEntity(String.format("/users/%d", defaultUser().getId()), request, String.class);
+    }
+
+    private HttpEntity<MultiValueMap<String, Object>> makeUserRequest(String method, String userId, String password, String name, String email) {
+        HtmlFormDataBuilder htmlFormDataBuilder = HtmlFormDataBuilder.urlEncodedForm();
+        htmlFormDataBuilder.addParameter("_method", method);
+        htmlFormDataBuilder.addParameter("userId", userId);
+        htmlFormDataBuilder.addParameter("password", password);
+        htmlFormDataBuilder.addParameter("name", name);
+        htmlFormDataBuilder.addParameter("email", email);
+        return htmlFormDataBuilder.build();
     }
 
 }
