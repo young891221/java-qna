@@ -104,4 +104,10 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         this.contents = contents;
         return this;
     }
+
+    public Question update(Question updatedQuestion) {
+        updateTitle(updatedQuestion.getTitle());
+        updateContents(updatedQuestion.getContents());
+        return this;
+    }
 }

@@ -1,18 +1,26 @@
 package codesquad.web;
 
+import codesquad.CannotManageException;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
-import codesquad.domain.UserRepository;
+import codesquad.service.QnaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import support.test.AcceptanceTest;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static codesquad.utils.HtmlFormDataBuilder.urlEncodedForm;
 import static org.junit.Assert.assertEquals;
 
 public class QuestionAcceptanceTest extends AcceptanceTest {
@@ -22,7 +30,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     private QuestionRepository questionRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private QnaService qnaService;
 
     @Before
     public void init() {
@@ -46,7 +54,12 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void 로그인한_사용자만_질문작성_가능한가() {
-
+        HttpEntity<MultiValueMap<String, Object>> request = urlEncodedForm()
+                .addParameter("title", "제목입니다.")
+                .addParameter("contents", "내용입니다.")
+                .build();
+        ResponseEntity<String> response = template().postForEntity("/questions", request, String.class);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 
     @Test
@@ -56,31 +69,56 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
                 .collect(Collectors.toList());
 
         questionRepository.save(questions);
-        List<Question> savedQuestions = questionRepository.findAll();
+        List<Question> savedQuestions = qnaService.findAll(new PageRequest(0, 10));
         assertEquals(3, savedQuestions.size());
     }
 
     @Test
-    public void 질문_수정하기_테스트() {
+    public void 질문_수정하기_테스트() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
         saveQuestion = saveQuestion.updateTitle("updateTitle").updateContents("updateContents");
-        questionRepository.save(saveQuestion);
+        Question updatedQuestion = qnaService.update(findByUserId("javajigi"), saveQuestion.getId(), saveQuestion);
 
-        Question updatedQuestion = questionRepository.findOne(saveQuestion.getId());
         assertEquals(saveQuestion.getTitle(), updatedQuestion.getTitle());
         assertEquals(saveQuestion.getContents(), updatedQuestion.getContents());
     }
 
     @Test
-    public void 질문_삭제하기_테스트() {
+    public void 질문_삭제하기_테스트() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
         assertEquals(1, questionRepository.findAll().size());
-        questionRepository.delete(saveQuestion.getId());
+        qnaService.deleteQuestion(findByUserId("javajigi"), saveQuestion.getId());
         assertEquals(0, questionRepository.findAll().size());
     }
 
+    @Test(expected = CannotManageException.class)
+    public void 자신의_질문에만_수정이_가능한가() throws CannotManageException {
+        Question saveQuestion = questionRepository.save(question);
+        saveQuestion.updateContents("수정 내용입니다.");
+        qnaService.update(findByUserId("sanjigi"), saveQuestion.getId(), saveQuestion);
+    }
+
+    @Test(expected = CannotManageException.class)
+    public void 자신의_질문에만_삭제가_가능한가() throws CannotManageException {
+        Question saveQuestion = questionRepository.save(question);
+        qnaService.deleteQuestion(findByUserId("sanjigi"), saveQuestion.getId());
+    }
+
     @Test
-    public void 자기질문만_수정_삭제가능한가() {
-        User havi = new User(2, "havi", "test", "하비", "havi@gmail.com");
+    public void 자신의_질문에_수정가능한가_통합_테스트() {
+        Question saveQuestion = questionRepository.save(question);
+        HttpEntity<MultiValueMap<String, Object>> request = urlEncodedForm()
+                .addParameter("title", "수정 제목입니다.")
+                .addParameter("contents", "수정 내용입니다.")
+                .build();
+        ResponseEntity<String> response = template().exchange("/questions/"+saveQuestion.getId(), HttpMethod.PUT, request, String.class);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+
+    @Test
+    public void 자신의_질문에_삭제가능한가_통합_테스트() {
+        Question saveQuestion = questionRepository.save(question);
+        ResponseEntity<String> response = template().exchange("/questions/"+saveQuestion.getId(), HttpMethod.DELETE, urlEncodedForm().build(),  String.class);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
 }

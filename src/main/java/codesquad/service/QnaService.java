@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import codesquad.CannotDeleteException;
+import codesquad.CannotManageException;
 import codesquad.domain.Answer;
 import codesquad.domain.AnswerRepository;
 import codesquad.domain.Question;
@@ -40,14 +40,21 @@ public class QnaService {
         return questionRepository.findOne(id);
     }
 
-    public Question update(User loginUser, long id, Question updatedQuestion) {
-        // TODO 수정 기능 구현
-        return null;
+    public Question update(User loginUser, long id, Question updatedQuestion) throws CannotManageException {
+        Question question = questionRepository.findOne(id);
+        checkIsOwner(loginUser, question);
+        return questionRepository.save(question.update(updatedQuestion));
     }
 
     @Transactional
-    public void deleteQuestion(User loginUser, long questionId) throws CannotDeleteException {
-        // TODO 삭제 기능 구현
+    public void deleteQuestion(User loginUser, long questionId) throws CannotManageException {
+        Question question = questionRepository.findOne(questionId);
+        checkIsOwner(loginUser, question);
+        questionRepository.delete(question);
+    }
+
+    private void checkIsOwner(User loginUser, Question question) throws CannotManageException {
+        if(!question.isOwner(loginUser)) { throw new CannotManageException("수정/삭제는 글쓴이만 가능합니다."); }
     }
 
     public Iterable<Question> findAll() {
