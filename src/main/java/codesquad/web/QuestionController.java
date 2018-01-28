@@ -22,13 +22,13 @@ public class QuestionController {
         return "qna/form";
     }
 
-    @GetMapping("{id}")
-    public String questionList(@PathVariable Long id, Model model) {
+    @GetMapping("/{id}")
+    public String questionShow(@PathVariable Long id, Model model) {
         model.addAttribute("question", qnaService.findById(id));
         return "/qna/show";
     }
 
-    @GetMapping("{id}/form")
+    @GetMapping("/{id}/form")
     public String updateQuestionForm(@PathVariable Long id, Model model) {
         model.addAttribute("question", qnaService.findById(id));
         return "qna/updateForm";
@@ -40,7 +40,7 @@ public class QuestionController {
         return "redirect:/";
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public String questionUpdate(@PathVariable Long id, @LoginUser User loginUser, String title, String contents, Model model) {
         try {
             qnaService.update(loginUser, id, new Question(title, contents));
@@ -51,7 +51,7 @@ public class QuestionController {
         return "redirect:/";
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public String questionDelete(@PathVariable Long id, @LoginUser User loginUser, Model model) {
         try {
             qnaService.deleteQuestion(loginUser, id);
