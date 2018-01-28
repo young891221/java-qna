@@ -72,10 +72,10 @@ public class QnaServiceTest extends AcceptanceTest {
     }
 
     @Test
-    public void 질문_삭제하기_테스트() throws CannotManageException {
+    public void 질문_삭제하기_테스트() {
         Question saveQuestion = questionRepository.save(question);
         assertFalse(saveQuestion.isDeleted());
-        qnaService.deleteQuestion(findByUserId("javajigi"), saveQuestion.getId());
+        saveQuestion.deleted();
         assertTrue(saveQuestion.isDeleted());
     }
 

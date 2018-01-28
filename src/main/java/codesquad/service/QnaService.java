@@ -46,7 +46,7 @@ public class QnaService {
     public void deleteQuestion(User loginUser, long questionId) throws CannotManageException {
         Question question = questionRepository.findOne(questionId);
         checkIsOwner(loginUser, question);
-        questionRepository.delete(question);
+        question.deleted();
     }
 
     private void checkIsOwner(User loginUser, Question question) throws CannotManageException {

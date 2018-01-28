@@ -112,4 +112,8 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         updateContents(updatedQuestion.getContents());
         return this;
     }
+
+    public void deleted() {
+        this.deleted = true; //TODO:4단계에서 삭제히스토리 테이블에 저장
+    }
 }
