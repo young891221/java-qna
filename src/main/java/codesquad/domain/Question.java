@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.validation.constraints.Size;
 
+import codesquad.CannotManageException;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Where;
 
@@ -93,19 +94,20 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
     }
 
-    public Question updateTitle(String title) {
+    private Question updateTitle(String title) {
         if(StringUtils.isEmpty(title)) { throw new IllegalArgumentException(); }
         this.title = title;
         return this;
     }
 
-    public Question updateContents(String contents) {
+    private Question updateContents(String contents) {
         if(StringUtils.isEmpty(contents)) { throw new IllegalArgumentException(); }
         this.contents = contents;
         return this;
     }
 
-    public Question update(Question updatedQuestion) {
+    public Question update(User loginUser, Question updatedQuestion) throws CannotManageException {
+        if(!this.isOwner(loginUser)) { throw new CannotManageException("수정은 글쓴이만 가능합니다."); }
         updateTitle(updatedQuestion.getTitle());
         updateContents(updatedQuestion.getContents());
         return this;

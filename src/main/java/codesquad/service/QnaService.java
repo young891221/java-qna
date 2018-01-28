@@ -1,21 +1,17 @@
 package codesquad.service;
 
-import java.util.List;
-
-import javax.annotation.Resource;
-
+import codesquad.CannotManageException;
+import codesquad.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import codesquad.CannotManageException;
-import codesquad.domain.Answer;
-import codesquad.domain.AnswerRepository;
-import codesquad.domain.Question;
-import codesquad.domain.QuestionRepository;
-import codesquad.domain.User;
+import javax.annotation.Resource;
+import java.util.List;
+
+import static java.util.Optional.ofNullable;
 
 @Service("qnaService")
 public class QnaService {
@@ -41,9 +37,9 @@ public class QnaService {
     }
 
     public Question update(User loginUser, long id, Question updatedQuestion) throws CannotManageException {
-        Question question = questionRepository.findOne(id);
+        Question question = ofNullable(questionRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 글이 없습니다."));
         checkIsOwner(loginUser, question);
-        return questionRepository.save(question.update(updatedQuestion));
+        return questionRepository.save(question.update(loginUser, updatedQuestion));
     }
 
     @Transactional

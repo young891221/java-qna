@@ -39,7 +39,7 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     }
 
     private Question makeQuestion(String title, String contents) {
-        User javajigi = new User(1, "javajigi", "test", "자바지기", "javajigi@slipp.net");
+        User javajigi = findByUserId("javajigi");
         question = new Question(title, contents);
         question.writeBy(javajigi);
         return question;
@@ -79,8 +79,9 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void 질문_수정하기_테스트() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
-        saveQuestion = saveQuestion.updateTitle("updateTitle").updateContents("updateContents");
-        Question updatedQuestion = qnaService.update(findByUserId("javajigi"), saveQuestion.getId(), saveQuestion);
+        User javajigi = findByUserId("javajigi");
+        saveQuestion.update(javajigi, new Question("updateTitle", "updateContents"));
+        Question updatedQuestion = qnaService.update(javajigi, saveQuestion.getId(), saveQuestion);
 
         assertEquals(saveQuestion.getTitle(), updatedQuestion.getTitle());
         assertEquals(saveQuestion.getContents(), updatedQuestion.getContents());
@@ -97,7 +98,6 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     @Test(expected = CannotManageException.class)
     public void 자신의_질문에만_수정이_가능한가() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
-        saveQuestion.updateContents("수정 내용입니다.");
         qnaService.update(findByUserId("sanjigi"), saveQuestion.getId(), saveQuestion);
     }
 
