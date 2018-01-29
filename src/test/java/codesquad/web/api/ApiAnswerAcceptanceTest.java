@@ -25,7 +25,7 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void answer_생성을_위한_post요청이_정상적인가() {
-        AnswerDto answerDto = new AnswerDto((long) 1, "contents");
+        AnswerDto answerDto = new AnswerDto(1L, "contents");
         String location = createResource("/api/questions/1/answers", answerDto);
 
         AnswerDto dbAnswerDto = template().getForObject(location, AnswerDto.class);
@@ -45,7 +45,7 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void answer_삭제를_위한_delete요청이_정상적인가() {
-        AnswerDto answerDto = new AnswerDto((long) 1, "contents");
+        AnswerDto answerDto = new AnswerDto(1L, "contents");
         String location = createResource("/api/questions/1/answers", answerDto);
         deleteResource(location);
     }
