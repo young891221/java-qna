@@ -34,7 +34,7 @@ public class ApiQuestionController {
     private QnaService qnaService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getQuestions(@PathVariable Long id) throws CannotManageException {
+    public ResponseEntity<?> getQuestion(@PathVariable Long id) throws CannotManageException {
         return ResponseEntity.ok(qnaService.findById(id));
     }
 

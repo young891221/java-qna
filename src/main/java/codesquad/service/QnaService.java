@@ -46,12 +46,10 @@ public class QnaService {
         question.deleted(loginUser);
     }
 
-    public Iterable<Question> findAll() {
-        return questionRepository.findByDeleted(false);
-    }
+    public Iterable<Question> findAll() { return questionRepository.findAll(); }
 
     public Page<Question> findAll(Pageable pageable) {
-        return questionRepository.findAll(pageable);
+        return questionRepository.findByDeleted(false, pageable);
     }
 
     public Answer addAnswer(User loginUser, long questionId, String contents) {
