@@ -56,4 +56,13 @@ public class ApiQuestionController {
         headers.setLocation(URI.create("/api/questions/" + question.getId()));
         return new ResponseEntity<>(headers, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> putQuestion(@PathVariable Long id, @RequestBody QuestionDto questionDto, @LoginUser User loginUser) throws CannotManageException {
+        Question question = qnaService.update(loginUser, id, Question.convert(questionDto));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("/api/questions/" + question.getId()));
+        return new ResponseEntity<>(headers, HttpStatus.OK);
+    }
 }
