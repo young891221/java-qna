@@ -52,8 +52,16 @@ public class QnaService {
         return questionRepository.findByDeleted(false, pageable);
     }
 
-    public Answer addAnswer(User loginUser, long questionId, String contents) {
-        return null;
+    public Answer findOneAnswer(long id) throws CannotManageException {
+        return ofNullable(answerRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 댓글이 없습니다."));
+    }
+
+    public Answer addAnswer(User loginUser, long questionId, String contents) throws CannotManageException {
+        Question question = findById(questionId);
+        Answer answer = Answer.convert(loginUser, contents);
+        question.addAnswer(answer);
+
+        return answer;
     }
 
     public Answer deleteAnswer(User loginUser, long id) {

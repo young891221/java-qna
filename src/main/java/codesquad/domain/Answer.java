@@ -1,14 +1,10 @@
 package codesquad.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.Size;
-
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
+
+import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Answer extends AbstractEntity implements UrlGeneratable {
@@ -24,6 +20,7 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
     @Lob
     private String contents;
 
+    @Column
     private boolean deleted = false;
 
     public Answer() {
@@ -64,6 +61,10 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
 
     public boolean isDeleted() {
         return deleted;
+    }
+
+    public static Answer convert(User loginUser, String contents) {
+        return new Answer(loginUser, contents);
     }
 
     @Override

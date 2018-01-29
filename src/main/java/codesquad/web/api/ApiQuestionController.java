@@ -1,7 +1,9 @@
 package codesquad.web.api;
 
 import codesquad.CannotManageException;
+import codesquad.domain.Answer;
 import codesquad.domain.User;
+import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
 import codesquad.security.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,9 +71,22 @@ public class ApiQuestionController {
         return new ResponseEntity<>(httpHeaders(id), HttpStatus.OK);
     }
 
+    @PostMapping("/{questionId}/answers")
+    public ResponseEntity<?> postAnswer(@PathVariable Long questionId, @Valid @RequestBody AnswerDto answerDto, @LoginUser User loginUser) throws CannotManageException {
+        Answer answer = qnaService.addAnswer(loginUser, questionId, answerDto.getContents());
+
+        return new ResponseEntity<>(answerHttpHeaders(answer.getId()), HttpStatus.CREATED);
+    }
+
     private HttpHeaders httpHeaders(long id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create("/api/questions/" + id));
+        return headers;
+    }
+
+    private HttpHeaders answerHttpHeaders(long id) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("/api/answers/" + id));
         return headers;
     }
 }
