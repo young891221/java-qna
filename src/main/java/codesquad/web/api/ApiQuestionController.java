@@ -33,7 +33,7 @@ public class ApiQuestionController {
     @Autowired
     private QnaService qnaService;
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getQuestions(@PathVariable Long id) throws CannotManageException {
         return ResponseEntity.ok(qnaService.findById(id));
     }
@@ -52,17 +52,26 @@ public class ApiQuestionController {
     public ResponseEntity<?> postQuestion(@Valid @RequestBody QuestionDto questionDto, @LoginUser User loginUser) {
         Question question = qnaService.create(loginUser, Question.convert(questionDto));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api/questions/" + question.getId()));
-        return new ResponseEntity<>(headers, HttpStatus.CREATED);
+        return new ResponseEntity<>(httpHeaders(question.getId()), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> putQuestion(@PathVariable Long id, @RequestBody QuestionDto questionDto, @LoginUser User loginUser) throws CannotManageException {
         Question question = qnaService.update(loginUser, id, Question.convert(questionDto));
 
+        return new ResponseEntity<>(httpHeaders(question.getId()), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBoard(@PathVariable Long id, @LoginUser User loginUser) throws CannotManageException {
+        qnaService.deleteQuestion(loginUser, id);
+
+        return new ResponseEntity<>(httpHeaders(id), HttpStatus.OK);
+    }
+
+    private HttpHeaders httpHeaders(long id) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api/questions/" + question.getId()));
-        return new ResponseEntity<>(headers, HttpStatus.OK);
+        headers.setLocation(URI.create("/api/questions/" + id));
+        return headers;
     }
 }

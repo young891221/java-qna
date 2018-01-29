@@ -52,6 +52,11 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void question_삭제를_위한_delete요청이_정상적인가() {
+        QuestionDto questionDto = new QuestionDto("title", "content");
+        ResponseEntity<String> response = basicAuthTemplate(defaultUser()).postForEntity("/api/questions", questionDto, String.class);
+        String location = response.getHeaders().getLocation().getPath();
 
+        ResponseEntity<String> deleteResponse = basicAuthTemplate(defaultUser()).exchange(location, HttpMethod.DELETE, jsonEncodedForm().build(), String.class);
+        assertThat(deleteResponse.getStatusCode(), is(HttpStatus.OK));
     }
 }
