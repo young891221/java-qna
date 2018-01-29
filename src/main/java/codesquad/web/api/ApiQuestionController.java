@@ -90,6 +90,13 @@ public class ApiQuestionController {
         return new ResponseEntity<>(answerHttpHeaders(questionId, answer.getId()), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{questionId}/answers/{answerId}")
+    public ResponseEntity<?> deleteAnswer(@PathVariable Long questionId, @PathVariable Long answerId, @LoginUser User loginUser) throws CannotManageException {
+        qnaService.deleteAnswer(loginUser, answerId);
+
+        return new ResponseEntity<>(answerHttpHeaders(questionId, answerId), HttpStatus.OK);
+    }
+
     private HttpHeaders httpHeaders(long id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create("/api/questions/" + id));

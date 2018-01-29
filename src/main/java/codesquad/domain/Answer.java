@@ -85,4 +85,9 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
     public String toString() {
         return "Answer [id=" + getId() + ", writer=" + writer + ", contents=" + contents + "]";
     }
+
+    public void deleted(User loginUser) throws CannotManageException {
+        if(!this.isOwner(loginUser)) { throw new CannotManageException("삭제는 글쓴이만 가능합니다."); }
+        this.deleted = true;
+    }
 }

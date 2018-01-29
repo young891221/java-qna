@@ -25,11 +25,6 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void answer_리스트의_get요청이_정상적인가() {
-
-    }
-
-    @Test
     public void answer_생성을_위한_post요청이_정상적인가() {
         AnswerDto answerDto = new AnswerDto((long) 1, "contents");
         ResponseEntity<String> response = basicAuthTemplate(defaultUser()).postForEntity("/api/questions/1/answers", answerDto, String.class);
@@ -55,6 +50,12 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void answer_삭제를_위한_delete요청이_정상적인가() {
+        AnswerDto answerDto = new AnswerDto((long) 1, "contents");
+        ResponseEntity<String> response = basicAuthTemplate(defaultUser()).postForEntity("/api/questions/1/answers", answerDto, String.class);
+        String location = response.getHeaders().getLocation().getPath();
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
 
+        ResponseEntity<String> deleteResponse = basicAuthTemplate(defaultUser()).exchange(location, HttpMethod.DELETE, jsonEncodedForm().build(), String.class);
+        assertThat(deleteResponse.getStatusCode(), is(HttpStatus.OK));
     }
 }
