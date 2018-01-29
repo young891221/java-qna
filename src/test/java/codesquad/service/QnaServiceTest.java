@@ -72,10 +72,10 @@ public class QnaServiceTest extends AcceptanceTest {
     }
 
     @Test
-    public void 질문_삭제하기_테스트() {
+    public void 질문_삭제하기_테스트() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
         assertFalse(saveQuestion.isDeleted());
-        saveQuestion.deleted();
+        saveQuestion.deleted(findByUserId("javajigi"));
         assertTrue(saveQuestion.isDeleted());
     }
 
@@ -89,5 +89,14 @@ public class QnaServiceTest extends AcceptanceTest {
     public void 자신의_질문에만_삭제가_가능한가() throws CannotManageException {
         Question saveQuestion = questionRepository.save(question);
         qnaService.deleteQuestion(findByUserId("sanjigi"), saveQuestion.getId());
+    }
+
+    @Test(expected = CannotManageException.class)
+    public void 삭제된_글을_수정하려_했는가() throws CannotManageException {
+        Question saveQuestion = questionRepository.save(question);
+        User javajigi = findByUserId("javajigi");
+
+        qnaService.deleteQuestion(javajigi, saveQuestion.getId());
+        questionRepository.findOne(saveQuestion.getId()).update(javajigi, new Question("updateTitle", "updateContents"));
     }
 }

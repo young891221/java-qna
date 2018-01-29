@@ -41,6 +41,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @OrderBy("id ASC")
     private List<Answer> answers = new ArrayList<>();
 
+    @Column
     private boolean deleted = false;
 
     public Question() {
@@ -108,12 +109,15 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 
     public Question update(User loginUser, Question updatedQuestion) throws CannotManageException {
         if(!this.isOwner(loginUser)) { throw new CannotManageException("수정은 글쓴이만 가능합니다."); }
+        else if(isDeleted()) { throw new CannotManageException("삭제된 글입니다."); }
+
         updateTitle(updatedQuestion.getTitle());
         updateContents(updatedQuestion.getContents());
         return this;
     }
 
-    public void deleted() {
+    public void deleted(User loginUser) throws CannotManageException {
+        if(!this.isOwner(loginUser)) { throw new CannotManageException("수정은 글쓴이만 가능합니다."); }
         this.deleted = true; //TODO:4단계에서 삭제히스토리 테이블에 저장
     }
 }

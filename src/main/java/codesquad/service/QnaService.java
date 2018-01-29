@@ -39,19 +39,12 @@ public class QnaService {
 
     public Question update(User loginUser, long id, Question updatedQuestion) throws CannotManageException {
         Question question = ofNullable(questionRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 글이 없습니다."));
-        checkIsOwner(loginUser, question);
         return question.update(loginUser, updatedQuestion);
     }
 
-    @Transactional
     public void deleteQuestion(User loginUser, long questionId) throws CannotManageException {
         Question question = questionRepository.findOne(questionId);
-        checkIsOwner(loginUser, question);
-        question.deleted();
-    }
-
-    private void checkIsOwner(User loginUser, Question question) throws CannotManageException {
-        if(!question.isOwner(loginUser)) { throw new CannotManageException("수정/삭제는 글쓴이만 가능합니다."); }
+        question.deleted(loginUser);
     }
 
     public Iterable<Question> findAll() {
