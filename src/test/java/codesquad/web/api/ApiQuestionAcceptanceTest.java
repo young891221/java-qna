@@ -1,9 +1,9 @@
 package codesquad.web.api;
 
+import codesquad.dto.QuestionDto;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import support.test.AcceptanceTest;
 
 import static org.hamcrest.Matchers.is;
@@ -13,7 +13,8 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void question의_get요청이_정상적인가() {
-
+        ResponseEntity<String> response = template().getForEntity("/api/questions/1", String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
@@ -25,7 +26,13 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void question_생성을_위한_post요청이_정상적인가() {
+        QuestionDto questionDto = new QuestionDto("title", "content");
+        ResponseEntity<String> response = basicAuthTemplate(defaultUser()).postForEntity("/api/questions", questionDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
 
+        String location = response.getHeaders().getLocation().getPath();
+        QuestionDto dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertThat(dbQuestion, is(questionDto.setId(dbQuestion.getId())));
     }
 
     @Test

@@ -33,13 +33,12 @@ public class QnaService {
         return questionRepository.save(question);
     }
 
-    public Question findById(long id) {
-        return questionRepository.findOne(id);
+    public Question findById(long id) throws CannotManageException {
+        return findOneOrElseThrow(id);
     }
 
     public Question update(User loginUser, long id, Question updatedQuestion) throws CannotManageException {
-        Question question = ofNullable(questionRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 글이 없습니다."));
-        return question.update(loginUser, updatedQuestion);
+        return findOneOrElseThrow(id).update(loginUser, updatedQuestion);
     }
 
     public void deleteQuestion(User loginUser, long questionId) throws CannotManageException {
@@ -60,7 +59,11 @@ public class QnaService {
     }
 
     public Answer deleteAnswer(User loginUser, long id) {
-        // TODO 답변 삭제 기능 구현 
+        // TODO 답변 삭제 기능 구현
         return null;
+    }
+
+    private Question findOneOrElseThrow(long id) throws CannotManageException {
+        return ofNullable(questionRepository.findOne(id)).orElseThrow(() -> new CannotManageException("원본 글이 없습니다."));
     }
 }
