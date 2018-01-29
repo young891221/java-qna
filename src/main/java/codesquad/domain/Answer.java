@@ -1,5 +1,6 @@
 package codesquad.domain;
 
+import codesquad.CannotManageException;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
 
@@ -65,6 +66,14 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
 
     public static Answer convert(User loginUser, String contents) {
         return new Answer(loginUser, contents);
+    }
+
+    public Answer update(User loginUser, Answer updatedAnswer) throws CannotManageException {
+        if(!this.isOwner(loginUser)) { throw new CannotManageException("수정은 글쓴이만 가능합니다."); }
+        else if(isDeleted()) { throw new CannotManageException("삭제된 글입니다."); }
+
+        this.contents = updatedAnswer.getContents();
+        return this;
     }
 
     @Override

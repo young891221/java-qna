@@ -64,6 +64,10 @@ public class QnaService {
         return answer;
     }
 
+    public Answer updateAnswer(User loginUser, long id, Answer updatedAnswer) throws CannotManageException {
+        return findOneAnswer(id).update(loginUser, updatedAnswer);
+    }
+
     public Answer deleteAnswer(User loginUser, long id) {
         // TODO 답변 삭제 기능 구현
         return null;

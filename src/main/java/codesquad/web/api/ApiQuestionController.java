@@ -65,17 +65,29 @@ public class ApiQuestionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteBoard(@PathVariable Long id, @LoginUser User loginUser) throws CannotManageException {
+    public ResponseEntity<?> deleteQuestion(@PathVariable Long id, @LoginUser User loginUser) throws CannotManageException {
         qnaService.deleteQuestion(loginUser, id);
 
         return new ResponseEntity<>(httpHeaders(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{questionId}/answers/{answerId}")
+    public ResponseEntity<?> getAnswer(@PathVariable Long questionId, @PathVariable Long answerId) throws CannotManageException {
+        return ResponseEntity.ok(qnaService.findOneAnswer(answerId));
     }
 
     @PostMapping("/{questionId}/answers")
     public ResponseEntity<?> postAnswer(@PathVariable Long questionId, @Valid @RequestBody AnswerDto answerDto, @LoginUser User loginUser) throws CannotManageException {
         Answer answer = qnaService.addAnswer(loginUser, questionId, answerDto.getContents());
 
-        return new ResponseEntity<>(answerHttpHeaders(answer.getId()), HttpStatus.CREATED);
+        return new ResponseEntity<>(answerHttpHeaders(answer.getQuestion().getId(), answer.getId()), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{questionId}/answers/{answerId}")
+    public ResponseEntity<?> putAnswer(@PathVariable Long questionId, @PathVariable Long answerId, @RequestBody AnswerDto answerDto, @LoginUser User loginUser) throws CannotManageException {
+        Answer answer = qnaService.updateAnswer(loginUser, answerId, Answer.convert(loginUser, answerDto.getContents()));
+
+        return new ResponseEntity<>(answerHttpHeaders(questionId, answer.getId()), HttpStatus.OK);
     }
 
     private HttpHeaders httpHeaders(long id) {
@@ -84,9 +96,9 @@ public class ApiQuestionController {
         return headers;
     }
 
-    private HttpHeaders answerHttpHeaders(long id) {
+    private HttpHeaders answerHttpHeaders(long questionId, long answerId) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api/answers/" + id));
+        headers.setLocation(URI.create("/api/questions/" + questionId + "/answers/" + answerId));
         return headers;
     }
 }
