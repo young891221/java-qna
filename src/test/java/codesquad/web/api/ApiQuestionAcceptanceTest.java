@@ -68,14 +68,6 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void 자신의_질문이_아니면_삭제가_불가능한가() {
-        String questionLocation = createResource("/api/questions", new QuestionDto("title", "content"));
-        createResource(questionLocation + "/answers", new AnswerDto("contents"));
-        ResponseEntity<String> response = basicAuthTemplate(findByUserId("sanjigi")).exchange(questionLocation, HttpMethod.DELETE, jsonEncodedForm().build(), String.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
-    }
-
-    @Test
     public void 자신의_질문에_답변자가_같으면_삭제가_가능한가() throws IOException {
         String questionLocation = createResource("/api/questions", new QuestionDto("title", "content"));
         createResource(questionLocation + "/answers", new AnswerDto("contents"));
@@ -85,6 +77,14 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         Question questionResponse = new ObjectMapper().readValue(response.getBody(), Question.class);
         assertTrue(questionResponse.isDeleted());
+    }
+
+    @Test
+    public void 자신의_질문이_아니면_삭제가_불가능한가() {
+        String questionLocation = createResource("/api/questions", new QuestionDto("title", "content"));
+        createResource(questionLocation + "/answers", new AnswerDto("contents"));
+        ResponseEntity<String> response = basicAuthTemplate(findByUserId("sanjigi")).exchange(questionLocation, HttpMethod.DELETE, jsonEncodedForm().build(), String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
@@ -98,6 +98,9 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void 질문_삭제시_히스토리를_등록하는가() {
-
+        String questionLocation = createResource("/api/questions", new QuestionDto("title", "content"));
+        createResource(questionLocation + "/answers", new AnswerDto("contents"));
+        String deleteLocation = deleteResource(questionLocation);
+        //TODO: deleteHistory에 추가된 내역이 있는지 검색
     }
 }

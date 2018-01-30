@@ -70,7 +70,8 @@ public class QnaService {
 
     public void deleteAnswer(User loginUser, long id) throws CannotManageException {
         Answer answer = findOneAnswer(id);
-        answer.deleted(loginUser);
+        DeleteHistory deleteHistory = answer.deleted(loginUser);
+        deleteHistoryService.save(deleteHistory);
     }
 
     private Question findOneOrElseThrow(long id) throws CannotManageException {
