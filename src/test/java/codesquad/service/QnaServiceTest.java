@@ -99,4 +99,9 @@ public class QnaServiceTest extends AcceptanceTest {
         qnaService.deleteQuestion(javajigi, saveQuestion.getId());
         questionRepository.findOne(saveQuestion.getId()).update(javajigi, new Question("updateTitle", "updateContents"));
     }
+
+    @Test(expected = CannotManageException.class)
+    public void 삭제된_글을_삭제하려_했는가() {
+
+    }
 }
