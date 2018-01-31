@@ -61,19 +61,4 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
         ResponseEntity<String> response = template().exchange("/questions/"+saveQuestion.getId(), HttpMethod.DELETE, urlEncodedForm().build(),  String.class);
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
     }
-
-    @Test
-    public void 자신의_질문에_답변자가_같으면_삭제가_가능한가_통합_테스트() {
-
-    }
-
-    @Test
-    public void 자신의_질문에_답변자가_다르면_삭제가_불가능한가_통합_테스트() {
-
-    }
-
-    @Test
-    public void 질문_삭제시_히스토리를_등록하는가() {
-
-    }
 }
