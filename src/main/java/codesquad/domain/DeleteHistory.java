@@ -31,10 +31,9 @@ public class DeleteHistory {
     private User deletedBy;
 
     @Builder
-    public DeleteHistory(DeletedId id, User deletedBy, LocalDateTime createDate) {
+    public DeleteHistory(DeletedId id, User deletedBy) {
         this.id = id;
         this.deletedBy = deletedBy;
-        this.createDate = createDate;
         this.createDate = LocalDateTime.now();
     }
 }

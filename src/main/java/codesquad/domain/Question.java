@@ -1,7 +1,12 @@
 package codesquad.domain;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Where;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,12 +20,12 @@ import javax.persistence.OrderBy;
 import javax.validation.constraints.Size;
 
 import codesquad.CannotManageException;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Where;
-
 import codesquad.dto.QuestionDto;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
+
+import static codesquad.domain.ContentType.ANSWER;
+import static codesquad.domain.ContentType.QUESTION;
 
 @Entity
 public class Question extends AbstractEntity implements UrlGeneratable {
@@ -115,10 +120,18 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return this;
     }
 
-    public void deleted(User loginUser) throws CannotManageException {
+    public List<DeleteHistory> deleted(User loginUser) throws CannotManageException {
         checkCommon(loginUser, "삭제는 글쓴이만 가능합니다.", "이미 삭제된 글입니다.");
         hasOtherAnswerWriter();
         this.deleted = true;
+
+        return createDeleteHistorys(loginUser);
+    }
+
+    private List<DeleteHistory> createDeleteHistorys(User loginUser) {
+        List<DeletedId> deletedIds = new ArrayList<>(Arrays.asList(new DeletedId(getId(), QUESTION)));
+        deletedIds.addAll(answers.stream().map(Question::apply).collect(Collectors.toList()));
+        return deletedIds.stream().map(deletedId -> new DeleteHistory(deletedId, loginUser)).collect(Collectors.toList());
     }
 
     private void hasOtherAnswerWriter() throws CannotManageException {
@@ -132,5 +145,9 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 
     public static Question convert(QuestionDto questionDto) {
         return new Question(questionDto.getTitle(), questionDto.getContents());
+    }
+
+    private static DeletedId apply(Answer answer) {
+        return new DeletedId(answer.getId(), ANSWER);
     }
 }

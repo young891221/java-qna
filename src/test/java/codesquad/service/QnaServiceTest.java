@@ -101,7 +101,10 @@ public class QnaServiceTest extends AcceptanceTest {
     }
 
     @Test(expected = CannotManageException.class)
-    public void 삭제된_글을_삭제하려_했는가() {
-
+    public void 삭제된_글을_삭제하려_했는가() throws CannotManageException {
+        Question saveQuestion = questionRepository.save(question);
+        User javajigi = findByUserId("javajigi");
+        qnaService.deleteQuestion(javajigi, saveQuestion.getId());
+        qnaService.deleteQuestion(javajigi, saveQuestion.getId());
     }
 }

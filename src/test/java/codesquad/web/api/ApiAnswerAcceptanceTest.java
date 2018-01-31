@@ -17,6 +17,7 @@ import codesquad.dto.AnswerDto;
 import support.test.AcceptanceTest;
 
 import static codesquad.domain.ContentType.ANSWER;
+import static codesquad.utils.StringUtils.getIdBySubLocation;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -66,8 +67,7 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
         String location = createResource("/api/questions/1/answers", answerDto);
         String deletedLocation = deleteResource(location);
 
-        Long id = Long.valueOf(deletedLocation.substring(deletedLocation.length()-1));
-        DeleteHistory deleteHistory = deleteHistoryRepository.findById(DeletedId.builder().contentId(id).contentType(ANSWER).build());
+        DeleteHistory deleteHistory = deleteHistoryRepository.findById(DeletedId.builder().contentId(getIdBySubLocation(deletedLocation)).contentType(ANSWER).build());
         assertNotNull(deleteHistory);
     }
 

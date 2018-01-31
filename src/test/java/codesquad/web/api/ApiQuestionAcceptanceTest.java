@@ -3,12 +3,17 @@ package codesquad.web.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 
+import codesquad.domain.ContentType;
+import codesquad.domain.DeleteHistory;
+import codesquad.domain.DeleteHistoryRepository;
+import codesquad.domain.DeletedId;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionList;
 import codesquad.dto.AnswerDto;
@@ -16,13 +21,19 @@ import codesquad.dto.HateoasResponse;
 import codesquad.dto.QuestionDto;
 import support.test.AcceptanceTest;
 
+import static codesquad.domain.ContentType.ANSWER;
+import static codesquad.domain.ContentType.QUESTION;
 import static codesquad.utils.HtmlFormDataBuilder.jsonEncodedForm;
+import static codesquad.utils.StringUtils.getIdBySubLocation;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
+
+    @Autowired
+    private DeleteHistoryRepository deleteHistoryRepository;
 
     @Test
     public void 질문의_get요청이_정상적인가() {
@@ -99,8 +110,15 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void 질문_삭제시_히스토리를_등록하는가() {
         String questionLocation = createResource("/api/questions", new QuestionDto("title", "content"));
-        createResource(questionLocation + "/answers", new AnswerDto("contents"));
-        String deleteLocation = deleteResource(questionLocation);
-        //TODO: deleteHistory에 추가된 내역이 있는지 검색
+        String answerLocation = createResource(questionLocation + "/answers", new AnswerDto("contents"));
+        String deletedLocation = deleteResource(questionLocation);
+
+        checkDeleteHistory(deletedLocation, QUESTION);
+        checkDeleteHistory(answerLocation, ANSWER);
+    }
+
+    private void checkDeleteHistory(String deletedLocation, ContentType question) {
+        DeleteHistory questionDeleteHistory = deleteHistoryRepository.findById(DeletedId.builder().contentId(getIdBySubLocation(deletedLocation)).contentType(question).build());
+        assertNotNull(questionDeleteHistory);
     }
 }

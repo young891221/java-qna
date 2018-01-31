@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 
 import static java.util.Optional.ofNullable;
@@ -43,7 +45,8 @@ public class QnaService {
 
     public void deleteQuestion(User loginUser, long questionId) throws CannotManageException {
         Question question = questionRepository.findOne(questionId);
-        question.deleted(loginUser);
+        List<DeleteHistory> deleteHistory = question.deleted(loginUser);
+        deleteHistoryService.saveAll(deleteHistory);
     }
 
     public Iterable<Question> findAll() { return questionRepository.findAll(); }
