@@ -1,5 +1,6 @@
 package codesquad.web;
 
+import codesquad.domain.AnswerRepository;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
@@ -20,10 +21,14 @@ public class QuestionAcceptanceTest extends AcceptanceTest {
     private Question question;
 
     @Autowired
+    private AnswerRepository answerRepository;
+
+    @Autowired
     private QuestionRepository questionRepository;
 
     @Before
     public void init() {
+        answerRepository.deleteAll();
         questionRepository.deleteAll();
         makeQuestion("TestTitle", "테스트당");
     }

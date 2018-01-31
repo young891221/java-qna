@@ -1,30 +1,18 @@
 package codesquad.domain;
 
+import codesquad.CannotManageException;
+import codesquad.dto.QuestionDto;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Where;
+import support.domain.AbstractEntity;
+import support.domain.UrlGeneratable;
 
+import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.validation.constraints.Size;
-
-import codesquad.CannotManageException;
-import codesquad.dto.QuestionDto;
-import support.domain.AbstractEntity;
-import support.domain.UrlGeneratable;
-
-import static codesquad.domain.ContentType.ANSWER;
 import static codesquad.domain.ContentType.QUESTION;
 
 @Entity
@@ -41,10 +29,8 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_question_writer"))
     private User writer;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
-    @Where(clause = "deleted = false")
-    @OrderBy("id ASC")
-    private List<Answer> answers = new ArrayList<>();
+    @Embedded
+    private Answers answers = new Answers();
 
     @Column
     private boolean deleted = false;
@@ -130,12 +116,12 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 
     private List<DeleteHistory> createDeleteHistorys(User loginUser) {
         List<DeletedId> deletedIds = new ArrayList<>(Arrays.asList(new DeletedId(getId(), QUESTION)));
-        deletedIds.addAll(answers.stream().map(Question::apply).collect(Collectors.toList()));
+        deletedIds.addAll(answers.convertDeletedId());
         return deletedIds.stream().map(deletedId -> new DeleteHistory(deletedId, loginUser)).collect(Collectors.toList());
     }
 
     private void hasOtherAnswerWriter() throws CannotManageException {
-        if(answers.stream().filter(answer -> !answer.isOwner(writer)).findAny().isPresent()) { throw new CannotManageException("다른 사용자가 답변을 달아 삭제할 수 없습니다."); }
+        if(answers.isHasOtherWriter(writer)) { throw new CannotManageException("다른 사용자가 답변을 달아 삭제할 수 없습니다."); }
     }
 
     private void checkCommon(User loginUser, String ownerMessage, String deleteMessage) throws CannotManageException {
@@ -147,7 +133,4 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return new Question(questionDto.getTitle(), questionDto.getContents());
     }
 
-    private static DeletedId apply(Answer answer) {
-        return new DeletedId(answer.getId(), ANSWER);
-    }
 }

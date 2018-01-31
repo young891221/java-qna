@@ -1,13 +1,12 @@
 package codesquad.service;
 
 import codesquad.CannotManageException;
+import codesquad.domain.AnswerRepository;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import support.test.AcceptanceTest;
@@ -16,12 +15,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class QnaServiceTest extends AcceptanceTest {
     private Question question;
+
+    @Autowired
+    private AnswerRepository answerRepository;
 
     @Autowired
     private QuestionRepository questionRepository;
@@ -31,6 +31,7 @@ public class QnaServiceTest extends AcceptanceTest {
 
     @Before
     public void init() {
+        answerRepository.deleteAll();
         questionRepository.deleteAll();
         makeQuestion("TestTitle", "테스트당");
     }
